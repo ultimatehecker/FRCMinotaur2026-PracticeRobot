@@ -3,6 +3,7 @@ package frc.robot.subsystems.drivetrain;
 import static edu.wpi.first.units.Units.KilogramMetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.util.Queue;
@@ -72,6 +73,8 @@ public class ModuleIOHardware implements ModuleIO {
     private StatusSignal<AngularVelocity> swerveEncoderVelocity;
     private StatusSignal<MagnetHealthValue> swerveEncoderMagnetHealth;
     private StatusSignal<Voltage> swerveEncoderSupplyVoltage;
+
+    private Rotation2d swerveEncoderOffset;
 
     public ModuleIOHardware(int moduleNumber, SwerveModuleConstants swerveModuleConstants) {
         driveMotor = new SparkMax(swerveModuleConstants.driveMotorID(), MotorType.kBrushless);
@@ -166,6 +169,8 @@ public class ModuleIOHardware implements ModuleIO {
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, driveEncoder::getPosition);
         steerPositionQueue = SparkOdometryThread.getInstance().registerSignal(steerMotor, steerEncoder::getPosition);
+
+        swerveEncoderOffset = swerveModuleConstants.swerveEncoderOffset();
     }
 
     @Override
@@ -178,7 +183,7 @@ public class ModuleIOHardware implements ModuleIO {
         inputs.isDriveMotorConnected = driveConnectedDebouncer.calculate(!REVUtility.sparkStickyFault);
 
         REVUtility.sparkStickyFault = false;
-        REVUtility.ifOk(steerMotor, steerEncoder::getPosition, (v) -> inputs.steerPositionRadians = v);
+        REVUtility.ifOk(steerMotor, steerEncoder::getPosition, (v) -> inputs.steerPositionRadians = new Rotation2d(v).minus(swerveEncoderOffset));
         REVUtility.ifOk(steerMotor, steerEncoder::getVelocity, (v) -> inputs.steerVelocityRadiansPerSecond = v);
         REVUtility.ifOk(steerMotor, new DoubleSupplier[] {steerMotor::getAppliedOutput, steerMotor::getBusVoltage}, (v) -> inputs.steerAppliedVoltage = v[0] * v[1]);
         REVUtility.ifOk(steerMotor, steerMotor::getOutputCurrent, (v) -> inputs.steerCurrentAmperes = v);
@@ -186,7 +191,7 @@ public class ModuleIOHardware implements ModuleIO {
 
         StatusCode swerveEncoderStatus = BaseStatusSignal.refreshAll(swerveEncoderPosition, swerveEncoderVelocity, swerveEncoderMagnetHealth, swerveEncoderSupplyVoltage);
         inputs.isSwerveEncoderConnected = swerveEncoderConnectedDebouncer.calculate(swerveEncoderStatus.isOK());
-        inputs.swerveEncoderPositionRadians = swerveEncoderPosition.getValue().in(Radians);
+        inputs.swerveEncoderPositionRadians = Rotation2d.fromRotations(swerveEncoderPosition.getValue().in(Rotations));
         inputs.swerveEncoderVelocityRadiansPerSecond = swerveEncoderVelocity.getValue().in(RadiansPerSecond);
         inputs.swerveEncoderMagnetHealth = swerveEncoderMagnetHealth.getValue();
         inputs.swerveEncoderSupplyVoltage = swerveEncoderSupplyVoltage.getValue().in(Volts);

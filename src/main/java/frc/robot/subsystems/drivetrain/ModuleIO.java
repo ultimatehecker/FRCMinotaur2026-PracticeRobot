@@ -17,14 +17,14 @@ public interface ModuleIO {
         public double driveTempuratureCelsius = 0.0; // Will depricate when using MinoSparkMax
 
         public boolean isSteerMotorConnected = false; // Will depricate when using MinoSparkMax
-        public double steerPositionRadians = 0.0;
+        public Rotation2d steerPositionRadians = Rotation2d.kZero;
         public double steerVelocityRadiansPerSecond = 0.0;
         public double steerAppliedVoltage = 0.0;
         public double steerCurrentAmperes = 0.0;
         public double steerTempuratureCelsius = 0.0; // Will depricate when using MinoSparkMax
 
         public boolean isSwerveEncoderConnected = false;
-        public double swerveEncoderPositionRadians = 0.0; // figure out units for this as we code
+        public Rotation2d swerveEncoderPositionRadians = Rotation2d.kZero; // figure out units for this as we code
         public double swerveEncoderVelocityRadiansPerSecond = 0.0;
         public MagnetHealthValue swerveEncoderMagnetHealth = MagnetHealthValue.Magnet_Invalid;
         public double swerveEncoderSupplyVoltage = 0.0;
