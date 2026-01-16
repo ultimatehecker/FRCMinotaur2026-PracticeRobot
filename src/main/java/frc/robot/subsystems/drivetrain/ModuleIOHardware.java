@@ -42,7 +42,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.constants.DrivetrainConstants.SwerveModuleConstants;
-import frc.robot.subsystems.drivetrain.ModuleIO.ModuleIOInputs;
 import frc.robot.utilities.PhoenixUtility;
 import frc.robot.utilities.REVUtility;
 
@@ -113,7 +112,7 @@ public class ModuleIOHardware implements ModuleIO {
             .outputCurrentPeriodMs(20);
 
         REVUtility.tryUntilOk(driveMotor, 5, () -> driveMotor.configure(driveConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-        REVUtility.tryUntilOk(driveMotor, 6, () -> driveEncoder.setPosition(0.0));
+        REVUtility.tryUntilOk(driveMotor, 5, () -> driveEncoder.setPosition(0.0));
 
         swerveEncoderConfiguration = new CANcoderConfiguration()
             .withMagnetSensor(new MagnetSensorConfigs()
@@ -130,9 +129,9 @@ public class ModuleIOHardware implements ModuleIO {
             .voltageCompensation(12.0);
 
         steerConfiguration.encoder
-            .inverted(DrivetrainConstants.kSteerEncoderInverted)
-            .positionConversionFactor(DrivetrainConstants.kDriveEncoderPositionFactor)
-            .velocityConversionFactor(DrivetrainConstants.kDriveEncoderVelocityFactor)
+            .positionConversionFactor(DrivetrainConstants.kSteerEncoderPositionFactor)
+            .velocityConversionFactor(DrivetrainConstants.kSteerEncoderVelocityFactor)
+            .uvwMeasurementPeriod(10)
             .uvwAverageDepth(2);
 
         steerConfiguration.closedLoop
@@ -150,8 +149,8 @@ public class ModuleIOHardware implements ModuleIO {
             .busVoltagePeriodMs(20)
             .outputCurrentPeriodMs(20);
 
-        REVUtility.tryUntilOk(steerMotor, 5, () -> steerMotor.configure(driveConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-        REVUtility.tryUntilOk(steerMotor, 6, () -> steerEncoder.setPosition(0.0)); // IMPORTANT TODO: Need to set the position to the current position of the absolute encoder;
+        REVUtility.tryUntilOk(steerMotor, 5, () -> steerMotor.configure(steerConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+        REVUtility.tryUntilOk(steerMotor, 5, () -> steerEncoder.setPosition(0.0)); // IMPORTANT TODO: Need to set the position to the current position of the absolute encoder;
 
         swerveEncoderPosition = swerveEncoder.getAbsolutePosition();
         swerveEncoderVelocity = swerveEncoder.getVelocity();
@@ -224,6 +223,6 @@ public class ModuleIOHardware implements ModuleIO {
     @Override
     public void setSteerPosition(Rotation2d rotation) {
         double setpoint = MathUtil.inputModulus(rotation.getRadians(), DrivetrainConstants.kSteerPIDMinInput, DrivetrainConstants.kSteerPIDMaxInput);
-        steerController.setSetpoint(setpoint, ControlType.kPosition);
+        steerController.setSetpoint(setpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 }

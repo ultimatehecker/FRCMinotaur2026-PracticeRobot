@@ -13,10 +13,10 @@ public class DrivetrainConstants {
     public static final double kOdometryFrequency = 50.0;
     public static final SwerveModuleType kSwerveModuleType = SwerveModuleType.MK3_FAST;
 
-    public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(1, 2, 9, Rotation2d.fromRotations(0.0)); // replace with actual values
-    public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(3, 4, 10, Rotation2d.fromRotations(0.0)); // replace with actual values
+    public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(1, 2, 9, Rotation2d.fromRotations(-0.033447)); // replace with actual values
+    public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(3, 4, 10, Rotation2d.fromRotations(-0.478271)); // replace with actual values
     public static final SwerveModuleConstants kBackLeftModuleConstants = new SwerveModuleConstants(5, 6, 11, Rotation2d.fromRotations(0.0)); // replace with actual values
-    public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(7, 8, 12, Rotation2d.fromRotations(0.0)); // replace with actual values
+    public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(7, 8, 12, Rotation2d.fromRotations(-0.227051)); // replace with actual values
 
     public static final double kDriveMaximumSpeedMetersPerSecond = 4.5;
     public static final double kDriveMaximumAccelerationMetersPerSecondSquared = 9.0;
@@ -46,8 +46,8 @@ public class DrivetrainConstants {
     public static final double steerKd = 0.0;
     public static final double steerSimP = 8.0;
     public static final double steerSimD = 0.0;
-    public static final double kSteerPIDMinInput = 0; // Radians
-    public static final double kSteerPIDMaxInput = 2 * Math.PI; // Radians
+    public static final double kSteerPIDMinInput = -Math.PI; // Radians
+    public static final double kSteerPIDMaxInput = Math.PI; // Radians
 
     // Steer Motor Configuration
     public static final boolean kSteerMotorInverted = kSwerveModuleType.isSteerInverted();
@@ -58,8 +58,8 @@ public class DrivetrainConstants {
     // Steer Motor Encoder Configuration
     public static final boolean kSteerEncoderInverted = false;
     public static final boolean kSwerveEncoderInverted = false;
-    public static final double kSteerEncoderPositionFactor = (2 * Math.PI) / kSteerMotorReduction; // Rotations -> Radians
-    public static final double kSteerEncoderVelocityFactor = (2 * Math.PI) / 60.0 / kSteerMotorReduction; // RPM -> Rad/Sec
+    public static final double kSteerEncoderPositionFactor = 2 * Math.PI / kSteerMotorReduction; // Rotations -> Radians
+    public static final double kSteerEncoderVelocityFactor = 2 * Math.PI / kSteerMotorReduction / 60; // RPM -> Rad/Sec
 
     public static final double kWheelRadiusMeters = Units.inchesToMeters(2.0);
     public static final double kTrackWidth = Units.inchesToMeters(21.5);

@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.constants.DrivetrainConstants;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -85,6 +86,8 @@ public class Module {
         state.cosineScale(inputs.steerPositionRadians);
 
         io.setDriveVelocity(state.speedMetersPerSecond / DrivetrainConstants.kWheelRadiusMeters);
+
+        if(Math.abs(state.angle.getRadians() - getAngle().getRadians()) < 0.1) return;
         io.setSteerPosition(state.angle);
     }
 
