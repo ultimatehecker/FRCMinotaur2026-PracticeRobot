@@ -1,5 +1,14 @@
 package frc.robot.constants;
 
+import static edu.wpi.first.units.Units.Kilogram;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
+
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 
@@ -88,6 +97,24 @@ public class DrivetrainConstants {
         ),
         kModuleTranslations
     );
+
+    public static final DriveTrainSimulationConfig kMapleSimConfiguration = DriveTrainSimulationConfig.Default()
+        .withCustomModuleTranslations(kModuleTranslations)
+        .withRobotMass(Kilogram.of(kRobotMassKilograms))
+        .withGyro(COTS.ofPigeon2())
+        .withSwerveModule(
+            new SwerveModuleSimulationConfig(
+                kDriveSimulatedGearbox,
+                kSteerSimulatedGearbox,
+                kDriveMotorReduction,
+                kSteerMotorReduction,
+                Volts.of(0.1),
+                Volts.of(0.1),
+                Meters.of(kWheelRadiusMeters),
+                KilogramSquareMeters.of(0.02),
+                kWheelCOF
+            )
+        );
 
     public record SwerveModuleConstants (
         int driveMotorID, 

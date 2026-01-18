@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.motorsims.SimulatedBattery;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -20,13 +23,17 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIO;
 import frc.robot.subsystems.drivetrain.GyroIOHardware;
+import frc.robot.subsystems.drivetrain.GyroIOSimulation;
 import frc.robot.subsystems.drivetrain.ModuleIO;
 import frc.robot.subsystems.drivetrain.ModuleIOHardware;
+import frc.robot.subsystems.drivetrain.ModuleIOSimulation;
 
 public class RobotContainer {
   private final Drivetrain drivetrain;
   private final CommandXboxController primaryController = new CommandXboxController(0);
   private final LoggedDashboardChooser<Command> autonomousChooser;
+
+  private SwerveDriveSimulation driveSimulation = null;
 
   public RobotContainer() {
     switch (GlobalConstants.kCurrentMode) {
@@ -41,7 +48,17 @@ public class RobotContainer {
 
         break;
       case SIM:
-        drivetrain = new Drivetrain(new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+        this.driveSimulation = new SwerveDriveSimulation(DrivetrainConstants.kMapleSimConfiguration, new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+
+        drivetrain = new Drivetrain(
+          new GyroIOSimulation(driveSimulation.getGyroSimulation()), 
+          new ModuleIOSimulation(driveSimulation.getModules()[0]), 
+          new ModuleIOSimulation(driveSimulation.getModules()[1]), 
+          new ModuleIOSimulation(driveSimulation.getModules()[2]), 
+          new ModuleIOSimulation(driveSimulation.getModules()[3])
+        );
+
         break;
       default:
         drivetrain = new Drivetrain(new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
