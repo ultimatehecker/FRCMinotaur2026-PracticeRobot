@@ -10,8 +10,12 @@ import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
+import com.ctre.phoenix6.signals.MagnetHealthValue;
+import com.ctre.phoenix6.sim.CANcoderSimState;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.utilities.REVUtility;
@@ -74,13 +78,17 @@ public class ModuleIOSimulation implements ModuleIO {
         inputs.driveTempuratureCelsius = 0.0;
 
         inputs.isSteerMotorConnected = true;
-        inputs.steerPositionRadians = moduleSimulation.getSteerAbsoluteFacing(); // idk what to do here (probably will just get relative position and convert to rotation2d)
+        inputs.steerPositionRadians = new Rotation2d(moduleSimulation.getSteerRelativeEncoderPosition().in(Radians)); // idk what to do here (probably will just get relative position and convert to rotation2d)
         inputs.steerVelocityRadiansPerSecond = moduleSimulation.getSteerRelativeEncoderVelocity().in(RadiansPerSecond);
         inputs.steerCurrentAmperes = Math.abs(moduleSimulation.getSteerMotorSupplyCurrent().in(Amps));
         inputs.steerAppliedVoltage = steerAppliedVoltage;
         inputs.steerTempuratureCelsius = 0.0;
 
-        // Figure out what to do here for the absolute steering encoder
+        inputs.isSwerveEncoderConnected = true;
+        inputs.swerveEncoderMagnetHealth = MagnetHealthValue.Magnet_Green;
+        inputs.swerveEncoderPositionRadians = moduleSimulation.getSteerAbsoluteFacing();
+        inputs.swerveEncoderVelocityRadiansPerSecond = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
+        inputs.swerveEncoderSupplyVoltage = 12.0;
 
         inputs.odometryTimestamps = REVUtility.getSimulationOdometryTimeStamps();
         inputs.odometryDrivePositionsRadians = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositions()).mapToDouble(angle -> angle.in(Radians)).toArray();
