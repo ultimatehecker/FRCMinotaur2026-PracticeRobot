@@ -12,6 +12,7 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.utilities.REVUtility;
 
@@ -20,11 +21,21 @@ public class ModuleIOSimulation implements ModuleIO {
     private final SimulatedMotorController.GenericMotorController driverMotor;
     private final SimulatedMotorController.GenericMotorController steerMotor;
 
+    private final LoggedTunableNumber driveKp = new LoggedTunableNumber("Drivetrain/DriveKp", DrivetrainConstants.driveSimKp);
+    private final LoggedTunableNumber driveKi = new LoggedTunableNumber("Drivetrain/DriveKi", DrivetrainConstants.driveSimKi);
+    private final LoggedTunableNumber driveKd = new LoggedTunableNumber("Drivetrain/DriveKd", DrivetrainConstants.driveSimKd);
+    private final LoggedTunableNumber driveKs = new LoggedTunableNumber("Drivetrain/DriveKs", DrivetrainConstants.driveSimKs);
+    private final LoggedTunableNumber driveKv = new LoggedTunableNumber("Drivetrain/DriveKv", DrivetrainConstants.driveSimKv);
+
+    private final LoggedTunableNumber steerKp = new LoggedTunableNumber("Drivetrain/SteerKp", DrivetrainConstants.steerSimKp);
+    private final LoggedTunableNumber steerKi = new LoggedTunableNumber("Drivetrain/SteerKi", DrivetrainConstants.steerSimKi);
+    private final LoggedTunableNumber steerKd = new LoggedTunableNumber("Drivetrain/SteerKd", DrivetrainConstants.steerSimKd);
+
     private boolean driveClosedLoop = false;
     private boolean steerClosedLoop = false;
 
-    private final PIDController driveController = new PIDController(DrivetrainConstants.driveSimP, 0.0, DrivetrainConstants.driveSimD);
-    private final PIDController steerController = new PIDController(DrivetrainConstants.steerSimP, 0.0, DrivetrainConstants.steerSimD);
+    private final PIDController driveController = new PIDController(driveKp.get(), driveKi.get(), driveKd.get());
+    private final PIDController steerController = new PIDController(steerKp.get(), steerKi.get(), steerKd.get());
 
     private double driveFFVoltage = 0.0;
     private double driveAppliedVoltage = 0.0;
@@ -91,7 +102,7 @@ public class ModuleIOSimulation implements ModuleIO {
     @Override
     public void setDriveVelocity(double velocityRadiansPerSecond) {
         driveClosedLoop = true;
-        driveFFVoltage = DrivetrainConstants.driveSimKs * Math.signum(velocityRadiansPerSecond) + DrivetrainConstants.driveSimKv * velocityRadiansPerSecond;
+        driveFFVoltage = driveKs.get() * Math.signum(velocityRadiansPerSecond) + driveKv.get() * velocityRadiansPerSecond;
         driveController.setSetpoint(velocityRadiansPerSecond);
     }
 

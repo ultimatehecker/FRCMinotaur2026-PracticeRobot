@@ -32,11 +32,14 @@ public class DrivetrainConstants {
 
     // Drive Motor PID Constants
     public static final double driveKp = 0.0;
+    public static final double driveKi = 0.0;
     public static final double driveKd = 0.0;
     public static final double driveKs = 0.0;
     public static final double driveKv = 0.1;
-    public static final double driveSimP = 0.05;
-    public static final double driveSimD = 0.0;
+    public static final double driveKa = 0.0;
+    public static final double driveSimKp = 0.05;
+    public static final double driveSimKi = 0.0;
+    public static final double driveSimKd = 0.0;
     public static final double driveSimKs = 0.0;
     public static final double driveSimKv = 0.0789;
 
@@ -52,9 +55,11 @@ public class DrivetrainConstants {
 
     // Steer Motor PID Constants
     public static final double steerKp = 2.0;
+    public static final double steerKi = 0.0;
     public static final double steerKd = 0.0;
-    public static final double steerSimP = 8.0;
-    public static final double steerSimD = 0.0;
+    public static final double steerSimKp = 8.0;
+    public static final double steerSimKi = 0.0;
+    public static final double steerSimKd = 0.0;
     public static final double kSteerPIDMinInput = -Math.PI; // Radians
     public static final double kSteerPIDMaxInput = Math.PI; // Radians
 
@@ -62,7 +67,7 @@ public class DrivetrainConstants {
     public static final boolean kSteerMotorInverted = kSwerveModuleType.isSteerInverted();
     public static final int kSteerMotorCurrentLimit = 20;
     public static final double kSteerMotorReduction = kSwerveModuleType.getSteerReduction();
-    public static final DCMotor kSteerSimulatedGearbox = DCMotor.getNeo550(1);
+    public static final DCMotor kSteerSimulatedGearbox = DCMotor.getNEO(1);
 
     // Steer Motor Encoder Configuration
     public static final boolean kSteerEncoderInverted = false;
