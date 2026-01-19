@@ -11,11 +11,9 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 import com.ctre.phoenix6.signals.MagnetHealthValue;
-import com.ctre.phoenix6.sim.CANcoderSimState;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import frc.minolib.advantagekit.LoggedTunableNumber;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.utilities.REVUtility;
@@ -30,7 +28,6 @@ public class ModuleIOSimulation implements ModuleIO {
     private final LoggedTunableNumber driveKd = new LoggedTunableNumber("Drivetrain/DriveKd", DrivetrainConstants.driveSimKd);
     private final LoggedTunableNumber driveKs = new LoggedTunableNumber("Drivetrain/DriveKs", DrivetrainConstants.driveSimKs);
     private final LoggedTunableNumber driveKv = new LoggedTunableNumber("Drivetrain/DriveKv", DrivetrainConstants.driveSimKv);
-
     private final LoggedTunableNumber steerKp = new LoggedTunableNumber("Drivetrain/SteerKp", DrivetrainConstants.steerSimKp);
     private final LoggedTunableNumber steerKi = new LoggedTunableNumber("Drivetrain/SteerKi", DrivetrainConstants.steerSimKi);
     private final LoggedTunableNumber steerKd = new LoggedTunableNumber("Drivetrain/SteerKd", DrivetrainConstants.steerSimKd);
@@ -38,8 +35,8 @@ public class ModuleIOSimulation implements ModuleIO {
     private boolean driveClosedLoop = false;
     private boolean steerClosedLoop = false;
 
-    private final PIDController driveController = new PIDController(driveKp.get(), driveKi.get(), driveKd.get());
-    private final PIDController steerController = new PIDController(steerKp.get(), steerKi.get(), steerKd.get());
+    private PIDController driveController = new PIDController(driveKp.get(), driveKi.get(), driveKd.get());
+    private PIDController steerController = new PIDController(steerKp.get(), steerKi.get(), steerKd.get());
 
     private double driveFFVoltage = 0.0;
     private double driveAppliedVoltage = 0.0;
@@ -78,7 +75,7 @@ public class ModuleIOSimulation implements ModuleIO {
         inputs.driveTempuratureCelsius = 0.0;
 
         inputs.isSteerMotorConnected = true;
-        inputs.steerPositionRadians = new Rotation2d(moduleSimulation.getSteerRelativeEncoderPosition().in(Radians)); // idk what to do here (probably will just get relative position and convert to rotation2d)
+        inputs.steerPositionRadians = moduleSimulation.getSteerAbsoluteFacing(); // figure out why cannot use getSteerRelativeEncoderPosition()
         inputs.steerVelocityRadiansPerSecond = moduleSimulation.getSteerRelativeEncoderVelocity().in(RadiansPerSecond);
         inputs.steerCurrentAmperes = Math.abs(moduleSimulation.getSteerMotorSupplyCurrent().in(Amps));
         inputs.steerAppliedVoltage = steerAppliedVoltage;
@@ -93,6 +90,18 @@ public class ModuleIOSimulation implements ModuleIO {
         inputs.odometryTimestamps = REVUtility.getSimulationOdometryTimeStamps();
         inputs.odometryDrivePositionsRadians = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositions()).mapToDouble(angle -> angle.in(Radians)).toArray();
         inputs.odometrySteerPositionsRadians = moduleSimulation.getCachedSteerAbsolutePositions();
+
+        if (
+            driveKp.hasChanged(hashCode()) ||
+            driveKi.hasChanged(hashCode()) ||
+            driveKd.hasChanged(hashCode()) ||
+            steerKp.hasChanged(hashCode()) ||
+            steerKi.hasChanged(hashCode()) ||
+            steerKd.hasChanged(hashCode())
+        ) {
+            driveController.setPID(driveKp.get(), driveKi.get(), driveKd.get());
+            steerController.setPID(steerKp.get(), steerKi.get(), steerKd.get());
+        }
     }
 
     @Override
