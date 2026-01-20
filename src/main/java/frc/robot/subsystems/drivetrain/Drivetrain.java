@@ -16,7 +16,9 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -56,6 +58,10 @@ public class Drivetrain extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
     };
+
+    private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
     
     private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
@@ -166,6 +172,18 @@ public class Drivetrain extends SubsystemBase {
         }
 
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+    public void followTrajectory(SwerveSample sample) {
+        Pose2d pose = getPose();
+
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+            sample.vx + xController.calculate(pose.getX(), sample.x),
+            sample.vy + xController.calculate(pose.getY(), sample.y),
+            sample.omega + xController.calculate(pose.getRotation().getRadians(), sample.heading)
+        );
+
+        runVelocity(chassisSpeeds);
     }
 
     public void runCharacterization(double output) {
