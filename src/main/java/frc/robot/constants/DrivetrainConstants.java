@@ -27,10 +27,10 @@ public class DrivetrainConstants {
     public static final Pose2d kBlueCenterStartingPose = new Pose2d(3.550, 4.000, new Rotation2d(Math.toRadians(0)));
     public static final Pose2d kBlueRightStartingPose = new Pose2d(3.500, 0.650, new Rotation2d(Math.toRadians(45)));
 
-    public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(1, 2, 9, Rotation2d.fromRotations(-0.033447)); // replace with actual values
-    public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(3, 4, 10, Rotation2d.fromRotations(-0.478271)); // replace with actual values
-    public static final SwerveModuleConstants kBackLeftModuleConstants = new SwerveModuleConstants(5, 6, 11, Rotation2d.fromRotations(0.0)); // replace with actual values
-    public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(7, 8, 12, Rotation2d.fromRotations(-0.227051)); // replace with actual values
+    public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(1, 2, 9, Rotation2d.fromRotations(-0.029541)); // -0.029541 + 0.06
+    public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(3, 4, 10, Rotation2d.fromRotations(0)); // replace with actual values
+    public static final SwerveModuleConstants kBackLeftModuleConstants = new SwerveModuleConstants(5, 6, 11, Rotation2d.fromRotations(0)); // replace with actual values
+    public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(7, 8, 12, Rotation2d.fromRotations(0)); // replace with actual values
 
     public static final double kDriveMaximumSpeedMetersPerSecond = 4.5;
     public static final double kDriveMaximumAccelerationMetersPerSecondSquared = 9.0;
@@ -59,7 +59,7 @@ public class DrivetrainConstants {
     public static final double kDriveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / kDriveMotorReduction; 
 
     // Steer Motor PID Constants
-    public static final double steerKp = 2.0;
+    public static final double steerKp = 3.0;
     public static final double steerKi = 0.0;
     public static final double steerKd = 0.0;
     public static final double steerSimKp = 8.0;
@@ -70,7 +70,7 @@ public class DrivetrainConstants {
 
     // Steer Motor Configuration
     public static final boolean kSteerMotorInverted = kSwerveModuleType.isSteerInverted();
-    public static final int kSteerMotorCurrentLimit = 20;
+    public static final int kSteerMotorCurrentLimit = 30;
     public static final double kSteerMotorReduction = kSwerveModuleType.getSteerReduction();
     public static final DCMotor kSteerSimulatedGearbox = DCMotor.getNEO(1);
 
