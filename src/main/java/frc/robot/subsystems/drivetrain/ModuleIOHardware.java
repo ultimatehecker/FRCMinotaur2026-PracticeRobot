@@ -174,7 +174,7 @@ public class ModuleIOHardware implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         REVUtility.sparkStickyFault = false;
-        REVUtility.ifOk(driveMotor, driveEncoder::getPosition, (v) -> inputs.drivePositionRadians = v);
+        inputs.steerPositionRadians = Rotation2d.fromRotations(swerveEncoderPosition.getValue().in(Rotations)); //REVUtility.ifOk(driveMotor, driveEncoder::getPosition, (v) -> inputs.drivePositionRadians = v);
         REVUtility.ifOk(driveMotor, driveEncoder::getVelocity, (v) -> inputs.driveVelocityRadiansPerSecond = v);
         REVUtility.ifOk(driveMotor, new DoubleSupplier[] {driveMotor::getAppliedOutput, driveMotor::getBusVoltage}, (v) -> inputs.driveAppliedVoltage = v[0] * v[1]);
         REVUtility.ifOk(driveMotor, driveMotor::getOutputCurrent, (v) -> inputs.driveCurrentAmperes = v);
