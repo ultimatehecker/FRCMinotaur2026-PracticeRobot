@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
@@ -79,8 +80,6 @@ public class ModuleIOHardware implements ModuleIO {
         steerMotor = new SparkMax(swerveModuleConstants.steerMotorID(), MotorType.kBrushless);
         swerveEncoder = new CANcoder(swerveModuleConstants.swerveEncoderID());
 
-        swerveEncoderOffset = swerveModuleConstants.swerveEncoderOffset();
-
         driveEncoder = driveMotor.getEncoder();
         steerEncoder = steerMotor.getEncoder();
 
@@ -118,11 +117,24 @@ public class ModuleIOHardware implements ModuleIO {
         swerveEncoderConfiguration = new CANcoderConfiguration()
             .withMagnetSensor(new MagnetSensorConfigs()
                 .withAbsoluteSensorDiscontinuityPoint(0.5)
-                .withMagnetOffset(swerveEncoderOffset.getRotations())
+                .withMagnetOffset(swerveModuleConstants.swerveEncoderOffset().getRotations())
                 .withSensorDirection(DrivetrainConstants.kSwerveEncoderInverted ? SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive)
             );
 
         PhoenixUtility.tryUntilOk(5, () -> swerveEncoder.getConfigurator().apply(swerveEncoderConfiguration));
+
+        swerveEncoderPosition = swerveEncoder.getAbsolutePosition();
+        swerveEncoderVelocity = swerveEncoder.getVelocity();
+        swerveEncoderMagnetHealth = swerveEncoder.getMagnetHealth();
+        swerveEncoderSupplyVoltage = swerveEncoder.getSupplyVoltage();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50, 
+            swerveEncoderPosition,
+            swerveEncoderVelocity,
+            swerveEncoderMagnetHealth,
+            swerveEncoderSupplyVoltage
+        );
 
         steerConfiguration = new SparkMaxConfig()
             .idleMode(IdleMode.kBrake)
@@ -152,26 +164,11 @@ public class ModuleIOHardware implements ModuleIO {
             .outputCurrentPeriodMs(20);
 
         REVUtility.tryUntilOk(steerMotor, 5, () -> steerMotor.configure(steerConfiguration, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-        REVUtility.tryUntilOk(steerMotor, 5, () -> steerEncoder.setPosition(swerveEncoderOffset.getRadians()));
-
-        swerveEncoderPosition = swerveEncoder.getAbsolutePosition();
-        swerveEncoderVelocity = swerveEncoder.getVelocity();
-        swerveEncoderMagnetHealth = swerveEncoder.getMagnetHealth();
-        swerveEncoderSupplyVoltage = swerveEncoder.getSupplyVoltage();
-
-        BaseStatusSignal.setUpdateFrequencyForAll(
-            50, 
-            swerveEncoderPosition,
-            swerveEncoderVelocity,
-            swerveEncoderMagnetHealth,
-            swerveEncoderSupplyVoltage
-        );
+        REVUtility.tryUntilOk(steerMotor, 5, () -> steerEncoder.setPosition(swerveEncoderPosition.getValue().in(Radians)));
 
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, driveEncoder::getPosition);
         steerPositionQueue = SparkOdometryThread.getInstance().registerSignal(steerMotor, steerEncoder::getPosition);
-
-        swerveEncoderOffset = swerveModuleConstants.swerveEncoderOffset();
     }
 
     @Override
