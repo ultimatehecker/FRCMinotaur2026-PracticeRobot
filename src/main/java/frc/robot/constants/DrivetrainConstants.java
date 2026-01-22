@@ -27,10 +27,10 @@ public class DrivetrainConstants {
     public static final Pose2d kBlueCenterStartingPose = new Pose2d(3.550, 4.000, new Rotation2d(Math.toRadians(0)));
     public static final Pose2d kBlueRightStartingPose = new Pose2d(3.500, 0.650, new Rotation2d(Math.toRadians(45)));
 
-    public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(5, 6, 11, Rotation2d.fromRotations(0.153564 - 0.25));
-    public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(1, 2, 9, Rotation2d.fromRotations(-0.285156 + 0.54));
-    public static final SwerveModuleConstants kBackLeftModuleConstants = new SwerveModuleConstants(7, 8, 12, Rotation2d.fromRotations(-0.479004));
-    public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(3, 4, 10, Rotation2d.fromRotations(0.284424));
+    public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(5, 6, 11, new Rotation2d(0.09 - 1.04));
+    public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(1, 2, 9, new Rotation2d(1.773));
+    public static final SwerveModuleConstants kBackLeftModuleConstants = new SwerveModuleConstants(7, 8, 12, new Rotation2d(-3.203));
+    public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(3, 4, 10, new Rotation2d(-1.703));
 
     public static final double kDriveMaximumSpeedMetersPerSecond = 4.5;
     public static final double kDriveMaximumAccelerationMetersPerSecondSquared = 9.0;
