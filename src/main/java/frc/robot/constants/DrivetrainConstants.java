@@ -81,8 +81,8 @@ public class DrivetrainConstants {
     public static final double kSteerEncoderVelocityFactor = 2 * Math.PI / kSteerMotorReduction / 60; // RPM -> Rad/Sec
 
     public static final double kWheelRadiusMeters = Units.inchesToMeters(2.0);
-    public static final double kTrackWidth = Units.inchesToMeters(21.5);
-    public static final double kWheelBase = Units.inchesToMeters(21.5);
+    public static final double kTrackWidth = Units.inchesToMeters(15);
+    public static final double kWheelBase = Units.inchesToMeters(15);
     public static final double kDriveBaseRadius = Math.hypot(kTrackWidth / 2.0, kWheelBase / 2.0);
     public static final Translation2d[] kModuleTranslations = new Translation2d[] {
         new Translation2d(kTrackWidth / 2.0, kWheelBase / 2.0),
