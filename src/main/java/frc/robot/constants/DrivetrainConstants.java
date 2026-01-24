@@ -5,18 +5,26 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.flatbuffers.Constants;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.utilities.SwerveModuleType;
 
 public class DrivetrainConstants {
@@ -26,6 +34,7 @@ public class DrivetrainConstants {
     public static final Pose2d kBlueLeftStartingPose = new Pose2d(3.500, 7.400, new Rotation2d(Math.toRadians(-45)));
     public static final Pose2d kBlueCenterStartingPose = new Pose2d(3.550, 4.000, new Rotation2d(Math.toRadians(0)));
     public static final Pose2d kBlueRightStartingPose = new Pose2d(3.500, 0.650, new Rotation2d(Math.toRadians(45)));
+    public static final Pose2d t = new Pose2d(4.616, 4.039, new Rotation2d(0));
 
     public static final SwerveModuleConstants kFrontLeftModuleConstants = new SwerveModuleConstants(5, 6, 11, new Rotation2d(0.09 - 1.04));
     public static final SwerveModuleConstants kFrontRightModuleConstants = new SwerveModuleConstants(1, 2, 9, new Rotation2d(1.773));

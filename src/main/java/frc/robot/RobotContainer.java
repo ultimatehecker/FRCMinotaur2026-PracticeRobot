@@ -6,20 +6,22 @@ package frc.robot;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.motorsims.SimulatedBattery;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import com.google.flatbuffers.Constants;
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import frc.robot.command_factories.DrivetrainFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.DrivetrainCommands;
+import frc.minolib.controller.CommandSimulatedXboxController;
+import frc.minolib.controller.SimulatedXboxController;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.Mode;
@@ -33,7 +35,7 @@ import frc.robot.subsystems.drivetrain.ModuleIOSimulation;
 
 public class RobotContainer {
   private final Drivetrain drivetrain;
-  private final CommandXboxController primaryController = new CommandXboxController(0);
+  private final CommandSimulatedXboxController primaryController = new CommandSimulatedXboxController(0);
   private final LoggedDashboardChooser<Command> autonomousChooser;
 
   private SwerveDriveSimulation driveSimulation = null;
@@ -78,9 +80,9 @@ public class RobotContainer {
   public RobotContainer() {
     drivetrain = buildDrivetrain();
 
-    autonomousChooser = new LoggedDashboardChooser<>("Auton Choices", AutoBuilder.buildAutoChooser());
-    autonomousChooser.addOption("Drivetrain Wheel Radius Characterization", DrivetrainCommands.wheelRadiusCharacterization(drivetrain));
-    autonomousChooser.addOption("Drivetrain Simple FF Characterization", DrivetrainCommands.feedforwardCharacterization(drivetrain));
+    autonomousChooser = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
+    autonomousChooser.addOption("Drivetrain Wheel Radius Characterization", DrivetrainFactory.wheelRadiusCharacterization(drivetrain));
+    autonomousChooser.addOption("Drivetrain Simple FF Characterization", DrivetrainFactory.feedforwardCharacterization(drivetrain));
     autonomousChooser.addOption("Drivetrain SysId (Quasistatic Forward)", drivetrain.sysIdQuasistatic(Direction.kForward));
     autonomousChooser.addOption("Drivetrain SysId (Quasistatic Reverse)", drivetrain.sysIdQuasistatic(Direction.kReverse));
     autonomousChooser.addOption("Drivetrain SysId (Dynamic Forward)", drivetrain.sysIdDynamic(Direction.kForward));
@@ -90,23 +92,23 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    drivetrain.setDefaultCommand(DrivetrainCommands.joystickDrive(
+    drivetrain.setDefaultCommand(DrivetrainFactory.joystickDrive(
       drivetrain, 
       () -> -primaryController.getLeftY(), 
       () -> -primaryController.getLeftX(), 
       () -> -primaryController.getRightX()
     ));
 
-    primaryController.a().whileTrue(DrivetrainCommands.joystickDriveAtAngle(
+    primaryController.a().whileTrue(DrivetrainFactory.joystickDriveAtAngle(
       drivetrain,
       () -> -primaryController.getLeftY(),
       () -> -primaryController.getLeftX(),
-      () -> Rotation2d.kZero
+      () -> drivetrain.computeAngleFromHub(drivetrain.getPose(), DrivetrainConstants.t)
     ));
 
     primaryController.x().onTrue(Commands.runOnce(drivetrain::stopWithX, drivetrain));
-    primaryController.b().onTrue(Commands.runOnce(() ->
-      drivetrain.setPose(new Pose2d(drivetrain.getPose().getTranslation(), Rotation2d.kZero)), drivetrain).ignoringDisable(true));
+    primaryController.y().onTrue(DrivetrainFactory.driveToPoint(drivetrain, 5, 5, new Pose2d(3, 4, new Rotation2d(0))));
+    primaryController.b().onTrue(Commands.runOnce(() -> drivetrain.setPose(new Pose2d(drivetrain.getPose().getTranslation(), Rotation2d.kZero)), drivetrain).ignoringDisable(true));
   }
 
   public Command getAutonomousCommand() {
