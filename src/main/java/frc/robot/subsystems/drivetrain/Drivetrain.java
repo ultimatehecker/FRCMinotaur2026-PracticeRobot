@@ -2,7 +2,6 @@ package frc.robot.subsystems.drivetrain;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,7 +34,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -46,7 +44,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.minolib.math.MathUtility;
+
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.Mode;
@@ -77,7 +75,7 @@ public class Drivetrain extends SubsystemBase {
     private final PIDController teleopDriveToPointController = new PIDController(3.6, 0, 0.3);
     private final PIDController combinedRotationController = new PIDController(1, 0, 0.1);
 
-    private boolean isDriveToPointPoseApplied;
+    private boolean isDriveToPointPoseApplied = false;
     private Pose2d desiredDriveToPointPose;
     private final Timer driveToPoseTimer = new Timer();
     private Optional<Pose2d> driveToPointPoseToBeApplied;
@@ -223,13 +221,13 @@ public class Drivetrain extends SubsystemBase {
         if (choreoSampleToBeApplied.isPresent()) {
             var sample = choreoSampleToBeApplied.get();
             
-            Logger.recordOutput("Choreo/Timer Value", choreoTimer.get());
-            Logger.recordOutput("Choreo/Trajectory Name", desiredChoreoTrajectory.name());
-            Logger.recordOutput("Choreo/Total Time", desiredChoreoTrajectory.getTotalTime());
-            Logger.recordOutput("Choreo/Sample/Desired Pose", sample.getPose());
-            Logger.recordOutput("Choreo/Sample/Desired Chassis Speeds", sample.getChassisSpeeds());
-            Logger.recordOutput("Choreo/Sample/Module Forces X", sample.moduleForcesX());
-            Logger.recordOutput("Choreo/Sample/Module Forces Y", sample.moduleForcesY());
+            Logger.recordOutput("Drivetrain/Choreo/Timer Value", choreoTimer.get());
+            Logger.recordOutput("Drivetrain/Choreo/Trajectory Name", desiredChoreoTrajectory.name());
+            Logger.recordOutput("Drivetrain/Choreo/Total Time", desiredChoreoTrajectory.getTotalTime());
+            Logger.recordOutput("Drivetrain/Choreo/Sample/Desired Pose", sample.getPose());
+            Logger.recordOutput("Drivetrain/Choreo/Sample/Desired Chassis Speeds", sample.getChassisSpeeds());
+            Logger.recordOutput("Drivetrain/Choreo/Sample/Module Forces X", sample.moduleForcesX());
+            Logger.recordOutput("Drivetrain/Choreo/Sample/Module Forces Y", sample.moduleForcesY());
 
             Pose2d pose = getPose();
             ChassisSpeeds targetSpeeds = sample.getChassisSpeeds();
@@ -242,34 +240,19 @@ public class Drivetrain extends SubsystemBase {
         }
     }
 
-    public Rotation2d computeAngleFromHub(Pose2d robotPose, Pose2d targetPose) {
-        double robotX = robotPose.getX();
-        double robotY = robotPose.getY();
-        double robotHeading = robotPose.getRotation().getRadians();
+    public void runDriveToPoint(double constraintedMaximumLinearVelocity, double constraintedMaximumAngularVelocity, Pose2d targetPose) {
+        desiredDriveToPointPose = targetPose;
 
-        double turretX = robotX + 0 * Math.cos(robotHeading) - 0 * Math.sin(robotHeading);
-        double turretY = robotY + 0 * Math.sin(robotHeading) + 0 * Math.cos(robotHeading);
-
-        double dx = targetPose.getX() - turretX;
-        double dy = targetPose.getY() - turretY;
-
-        double targetAngleGlobal = Math.atan2(dy, dx);
-        double angleToGoal = targetAngleGlobal - robotHeading;
-        
-        return new Rotation2d(angleToGoal);
-    }
-
-    public void runDriveToPoint(double constraintedMaximumLinearVelocity, double constraintedMaximumAngularVelocity, Pose2d desiredPoseForDriveToPoint) {
         if(!isDriveToPointPoseApplied) {
             driveToPoseTimer.restart();
-            driveToPointPoseToBeApplied = Optional.of(desiredPoseForDriveToPoint);
+            driveToPointPoseToBeApplied = Optional.of(desiredDriveToPointPose);
             isDriveToPointPoseApplied = true;
         } else {
-            driveToPointPoseToBeApplied = Optional.of(desiredPoseForDriveToPoint);
+            driveToPointPoseToBeApplied = Optional.of(desiredDriveToPointPose);
         }
 
         if(driveToPointPoseToBeApplied.isPresent()) {
-            Translation2d translationToDesiredPoint = desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
+            Translation2d translationToDesiredPoint = desiredDriveToPointPose.getTranslation().minus(getPose().getTranslation());
             double linearDistance = translationToDesiredPoint.getNorm();
             double frictionConstant = 0.0;
 
@@ -281,7 +264,7 @@ public class Drivetrain extends SubsystemBase {
             double velocityOutput = 0.0;
 
             double currentHeading = getRotation().getRadians();
-            double targetHeading = desiredPoseForDriveToPoint.getRotation().getRadians();
+            double targetHeading = desiredDriveToPointPose.getRotation().getRadians();
 
             double angularVelocity = combinedRotationController.calculate(currentHeading, targetHeading);
 
@@ -305,7 +288,7 @@ public class Drivetrain extends SubsystemBase {
             Logger.recordOutput("Drivetrain/DriveToPoint/VelocityOutput", velocityOutput);
             Logger.recordOutput("Drivetrain/DriveToPoint/LinearDistance", linearDistance);
             Logger.recordOutput("Drivetrain/DriveToPoint/DirectionOfTravel", directionOfTravel);
-            Logger.recordOutput("Drivetrain/DriveToPoint/DesiredPoint", desiredPoseForDriveToPoint);
+            Logger.recordOutput("Drivetrain/DriveToPoint/DesiredPoint", desiredDriveToPointPose);
             Logger.recordOutput("Drivetrain/DriveToPoint/DesiredHeading", targetHeading);
             Logger.recordOutput("Drivetrain/DriveToPoint/CurrentHeading", currentHeading);
 
@@ -316,6 +299,23 @@ public class Drivetrain extends SubsystemBase {
                 runVelocity(new ChassisSpeeds(xComponent, yComponent, angularVelocity));
             }
         }
+    }
+
+    public Rotation2d computeAngleFromTarget(Pose2d robotPose, Pose2d targetPose) {
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotHeading = robotPose.getRotation().getRadians();
+
+        double turretX = robotX + 0 * Math.cos(robotHeading) - 0 * Math.sin(robotHeading);
+        double turretY = robotY + 0 * Math.sin(robotHeading) + 0 * Math.cos(robotHeading);
+
+        double dx = targetPose.getX() - turretX;
+        double dy = targetPose.getY() - turretY;
+
+        double targetAngleGlobal = Math.atan2(dy, dx);
+        double angleToGoal = targetAngleGlobal - robotHeading;
+        
+        return new Rotation2d(angleToGoal);
     }
 
     public boolean isAtDriveToPointSetpoint() {
