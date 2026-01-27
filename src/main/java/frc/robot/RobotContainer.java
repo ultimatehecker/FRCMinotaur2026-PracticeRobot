@@ -103,7 +103,7 @@ public class RobotContainer {
       drivetrain,
       () -> -primaryController.getLeftY(),
       () -> -primaryController.getLeftX(),
-      () -> drivetrain.computeAngleFromHub(drivetrain.getPose(), DrivetrainConstants.t)
+      () -> drivetrain.computeAngleFromTarget(drivetrain.getPose(), DrivetrainConstants.t)
     ));
 
     primaryController.x().onTrue(Commands.runOnce(drivetrain::stopWithX, drivetrain));
