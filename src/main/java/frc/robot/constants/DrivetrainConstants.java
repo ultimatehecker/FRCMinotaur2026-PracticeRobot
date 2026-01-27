@@ -5,26 +5,19 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.flatbuffers.Constants;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Filesystem;
+
 import frc.robot.utilities.SwerveModuleType;
 
 public class DrivetrainConstants {
@@ -41,8 +34,10 @@ public class DrivetrainConstants {
     public static final SwerveModuleConstants kBackLeftModuleConstants = new SwerveModuleConstants(7, 8, 12, new Rotation2d(-3.203));
     public static final SwerveModuleConstants kBackRightModuleConstants = new SwerveModuleConstants(3, 4, 10, new Rotation2d(-1.703));
 
-    public static final double kDriveMaximumSpeedMetersPerSecond = 4.5;
-    public static final double kDriveMaximumAccelerationMetersPerSecondSquared = 9.0;
+    public static final double kMaximumLinearVelocityMetersPerSecond = 4.5;
+    public static final double kMaximumLinearAccelerationMetersPerSecondSquared = 9.0;
+    public static final double kMaximumRotationalVelocityRadiansPerSecond = 3 * Math.PI;
+    public static final double kMaximumRotationalAccelerationRadiansPerSecondSquared = 6 * Math.PI; 
 
     // Drive Motor PID Constants
     public static final double driveKp = 0.0;
@@ -108,7 +103,7 @@ public class DrivetrainConstants {
         kRobotMOI,
         new ModuleConfig(
             kWheelRadiusMeters, 
-            kDriveMaximumSpeedMetersPerSecond, 
+            kMaximumLinearVelocityMetersPerSecond, 
             kWheelCOF, 
             kDriveSimulatedGearbox, 
             kDriveMotorCurrentLimit, 

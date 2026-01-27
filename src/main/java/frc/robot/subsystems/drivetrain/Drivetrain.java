@@ -195,7 +195,7 @@ public class Drivetrain extends SubsystemBase {
     public void runVelocity(ChassisSpeeds speeds) {
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DrivetrainConstants.kDriveMaximumSpeedMetersPerSecond);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DrivetrainConstants.kMaximumLinearVelocityMetersPerSecond);
 
         Logger.recordOutput("SwerveModuleStates/Setpoints", setpointStates);
         Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
@@ -257,7 +257,7 @@ public class Drivetrain extends SubsystemBase {
             double frictionConstant = 0.0;
 
             if (linearDistance >= Units.inchesToMeters(0.5)) {
-                frictionConstant = 0.02 * DrivetrainConstants.kDriveMaximumSpeedMetersPerSecond;
+                frictionConstant = 0.02 * DrivetrainConstants.kMaximumLinearVelocityMetersPerSecond;
             }
 
             Rotation2d directionOfTravel = translationToDesiredPoint.getAngle();
@@ -438,10 +438,10 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public double getMaxLinearSpeedMetersPerSecond() {
-        return DrivetrainConstants.kDriveMaximumSpeedMetersPerSecond;
+        return DrivetrainConstants.kMaximumLinearVelocityMetersPerSecond;
     }
 
     public double getMaxAngularSpeedRadiansPerSecond() {
-        return DrivetrainConstants.kDriveMaximumSpeedMetersPerSecond / DrivetrainConstants.kDriveBaseRadius;
+        return DrivetrainConstants.kMaximumLinearAccelerationMetersPerSecondSquared / DrivetrainConstants.kDriveBaseRadius;
     }
 }

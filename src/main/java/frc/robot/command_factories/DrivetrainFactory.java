@@ -110,66 +110,9 @@ public class DrivetrainFactory {
     }
 
     public static Command driveToPoint(Drivetrain drivetrain, double constraintedMaximumLinearVelocity, double constraintedMaximumAngularVelocity, Pose2d desiredPoseForDriveToPoint) {
-        PIDController rotationController = new PIDController(2, 0, 0.1);
-        rotationController.enableContinuousInput(-Math.PI, Math.PI);
-        
         return Commands.run(() -> {
-            Translation2d translationToDesiredPoint = desiredPoseForDriveToPoint.getTranslation().minus(drivetrain.getPose().getTranslation());
-            double linearDistance = translationToDesiredPoint.getNorm();
-            double frictionConstant = 0.0;
-
-            if (linearDistance >= Units.inchesToMeters(0.5)) {
-                frictionConstant = 0.02 * drivetrain.getMaxLinearSpeedMetersPerSecond();
-            }
-
-            Rotation2d directionOfTravel = translationToDesiredPoint.getAngle();
-            double velocityOutput = 0.0;
-
-            double currentHeading = drivetrain.getPose().getRotation().getRadians();
-            double targetHeading = desiredPoseForDriveToPoint.getRotation().getRadians();
-
-            double angularVelocity = rotationController.calculate(currentHeading, targetHeading);
-
-            if (DriverStation.isAutonomous()) {
-                velocityOutput = Math.min(
-                    Math.abs(autonomousDriveToPointController.calculate(linearDistance, 0)) + frictionConstant,
-                    constraintedMaximumLinearVelocity
-                );
-            } else {
-                velocityOutput = Math.min(
-                    Math.abs(teleopDriveToPointController.calculate(linearDistance, 0)) + frictionConstant,
-                    constraintedMaximumLinearVelocity
-                );
-            }
-
-            double xComponent = velocityOutput * directionOfTravel.getCos();
-            double yComponent = velocityOutput * directionOfTravel.getSin();
-
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/VelocitySetpointX", xComponent);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/VelocitySetpointY", yComponent);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/VelocityOutput", velocityOutput);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/LinearDistance", linearDistance);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/DirectionOfTravel", directionOfTravel);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/DesiredPoint", desiredPoseForDriveToPoint);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/DesiredHeading", targetHeading);
-            Logger.recordOutput("Drivetrain" + "/DriveToPoint/CurrentHeading", currentHeading);
-
-            if (Double.isNaN(constraintedMaximumAngularVelocity)) {
-                drivetrain.runVelocity(new ChassisSpeeds(
-                    xComponent,
-                    yComponent,
-                    angularVelocity
-                ));
-            } else {
-                angularVelocity = MathUtil.clamp(angularVelocity, -constraintedMaximumAngularVelocity, constraintedMaximumAngularVelocity);
-
-                drivetrain.runVelocity(new ChassisSpeeds(
-                    xComponent,
-                    yComponent,
-                    angularVelocity
-                ));
-            }
-        }, drivetrain).until(() -> MathUtil.isNear(0.0, desiredPoseForDriveToPoint.getTranslation().getNorm() - drivetrain.getPose().getTranslation().getNorm(), Units.inchesToMeters(0.5))).withName("DriveToPoint");
+            drivetrain.runDriveToPoint(constraintedMaximumLinearVelocity, constraintedMaximumAngularVelocity, desiredPoseForDriveToPoint);
+        }, drivetrain).until(drivetrain::isAtDriveToPointSetpoint);
     }
 
     public static Command feedforwardCharacterization(Drivetrain drivetrain) {
