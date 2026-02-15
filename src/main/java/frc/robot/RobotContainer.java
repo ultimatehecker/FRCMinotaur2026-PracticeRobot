@@ -24,6 +24,7 @@ import frc.minolib.controller.CommandSimulatedXboxController;
 import frc.minolib.controller.SimulatedXboxController;
 import frc.robot.constants.DrivetrainConstants;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.constants.GlobalConstants.Mode;
 import frc.robot.subsystems.drivetrain.Drivetrain;
 import frc.robot.subsystems.drivetrain.GyroIO;
@@ -32,9 +33,14 @@ import frc.robot.subsystems.drivetrain.GyroIOSimulation;
 import frc.robot.subsystems.drivetrain.ModuleIO;
 import frc.robot.subsystems.drivetrain.ModuleIOHardware;
 import frc.robot.subsystems.drivetrain.ModuleIOSimulation;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 
 public class RobotContainer {
   private final Drivetrain drivetrain;
+  private final Vision vision;
+
   private final CommandSimulatedXboxController primaryController = new CommandSimulatedXboxController(0);
   private final LoggedDashboardChooser<Command> autonomousChooser;
 
@@ -73,12 +79,37 @@ public class RobotContainer {
     }
   }
 
+  public Vision buildAprilTagVision() {
+    switch (GlobalConstants.kCurrentMode) {
+      case REAL -> {
+        return new Vision(
+          drivetrain::addVisionMeasurement, 
+          new VisionIOPhotonVision(VisionConstants.camera0Name, VisionConstants.robotToCamera0), 
+          new VisionIOPhotonVision(VisionConstants.camera1Name, VisionConstants.robotToCamera1)
+        );
+      }
+
+      case SIM -> {
+        return new Vision(drivetrain::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+      }
+
+      default -> {
+        return new Vision(drivetrain::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+      }
+    }
+  }
+
   public Drivetrain getDrivetrain() {
     return drivetrain;
   }
 
+  public Vision getAprilTagVision() {
+    return vision;
+  }
+
   public RobotContainer() {
     drivetrain = buildDrivetrain();
+    vision = buildAprilTagVision();
 
     autonomousChooser = new LoggedDashboardChooser<Command>("Auton Choices", AutoBuilder.buildAutoChooser());
     autonomousChooser.addOption("Drivetrain Wheel Radius Characterization", DrivetrainFactory.wheelRadiusCharacterization(drivetrain));
