@@ -15,11 +15,12 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
+import frc.minolib.vision.PhotonFiducialResult;
 
 public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
   protected PhotonPoseEstimator photonEstimator;
-  private final List<VisionIO.PoseObservation> observations = new ArrayList<>();
+  private final List<PhotonFiducialResult> observations = new ArrayList<>();
 
   public VisionIOPhotonVision(String cameraName, AprilTagFieldLayout layout, Transform3d robotToCamera) {
     camera = new PhotonCamera(cameraName);
@@ -37,11 +38,8 @@ public class VisionIOPhotonVision implements VisionIO {
       Optional<EstimatedRobotPose> visionEstimate = photonEstimator.estimateCoprocMultiTagPose(result);
 
       if (visionEstimate.isEmpty()) {
-        System.out.println("whyyyyyyyyyyyyyyyyyyyyyyy");
         visionEstimate = photonEstimator.estimateClosestToCameraHeightPose(result);
       }
-
-      System.out.println("Vision Estimate Present? " + visionEstimate.isPresent());
 
       visionEstimate.ifPresent(estimate -> {
             long tagsSeenBitMap = 0;
@@ -59,9 +57,7 @@ public class VisionIOPhotonVision implements VisionIO {
             averageAmbiguity /= estimate.targetsUsed.size();
             averageTagDistance /= estimate.targetsUsed.size();
 
-            System.out.print("its fucking working");
-
-            observations.add(new PoseObservation(
+            observations.add(new PhotonFiducialResult(
                 result.getTimestampSeconds(),
                 estimate.estimatedPose,
                 Timer.getFPGATimestamp() - result.getTimestampSeconds(),
@@ -74,7 +70,7 @@ public class VisionIOPhotonVision implements VisionIO {
             ));
         });
     }
-    inputs.poseObservations = observations.toArray(new PoseObservation[0]);
+    inputs.poseObservations = observations.toArray(new PhotonFiducialResult[0]);
 
     inputs.tagIds = new int[tagIds.size()];
     int i = 0;

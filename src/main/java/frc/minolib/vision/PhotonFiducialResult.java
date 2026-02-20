@@ -3,18 +3,19 @@ package frc.minolib.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 //import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 
 /** A data class for a fiducial result. */
 public record PhotonFiducialResult(
-    int numberOfFiducials,
-    double poseAmbiguity,
+    double timestamp,
     Pose3d cameraPose,
-    double averageDistance,
+    double latencySecs,
+    double averageAmbiguity,
     double reprojectionError,
     long tagsSeenBitMap,
-    double timestamp,
-    double latencySeconds
-    //VisionIO.PoseObservationType type
+    int numTags,
+    double averageTagDistance,
+    PoseObservationType type
 ) 
 {
 

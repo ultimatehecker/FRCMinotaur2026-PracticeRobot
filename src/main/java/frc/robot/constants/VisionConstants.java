@@ -12,8 +12,8 @@ public class VisionConstants {
       public static String camera0Name = "frontLeft";
       public static String camera1Name = "frontRight";
 
-      public static Transform3d robotToCamera0 = new Transform3d(Units.inchesToMeters(9.2837556), Units.inchesToMeters(1.6423085), Units.inchesToMeters(4.9584678 + 2), new Rotation3d(0.0, Units.degreesToRadians(20), Units.degreesToRadians(324)));
-      public static Transform3d robotToCamera1 = new Transform3d(Units.inchesToMeters(9.2859579), Units.inchesToMeters(-2.1461229), 4.9584678 + 2, new Rotation3d(0.0, Units.degreesToRadians(20), Units.degreesToRadians(36)));
+      public static Transform3d robotToCamera0 = new Transform3d(Units.inchesToMeters(9.2837556), Units.inchesToMeters(1.6423085), Units.inchesToMeters(6.9584678), new Rotation3d(0.0, Units.degreesToRadians(340), Units.degreesToRadians(324)));
+      public static Transform3d robotToCamera1 = new Transform3d(Units.inchesToMeters(9.2859579), Units.inchesToMeters(-2.1461229), Units.inchesToMeters(6.9584678), new Rotation3d(0.0, Units.degreesToRadians(340), Units.degreesToRadians(36)));
 
       public static double maxAmbiguity = 0.5;
       public static double maxZError = 0.75;
