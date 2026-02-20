@@ -39,10 +39,6 @@ public class Vision extends SubsystemBase {
         }
     }
 
-    public Rotation2d getTargetX(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.tx();
-    }
-
     @Override
     public void periodic() {
         for (int i = 0; i < io.length; i++) {
@@ -66,24 +62,24 @@ public class Vision extends SubsystemBase {
             for (int tagId : inputs[cameraIndex].tagIds) {
                 var tagPose = VisionConstants.aprilTagLayout.getTagPose(tagId);
                 if (tagPose.isPresent()) {
-                tagPoses.add(tagPose.get());
+                    tagPoses.add(tagPose.get());
                 }
             }
 
             for (var observation : inputs[cameraIndex].poseObservations) {
-                boolean rejectPose = observation.tagCount() == 0 || (observation.tagCount() == 1 && observation.ambiguity() > VisionConstants.maxAmbiguity) || Math.abs(observation.pose().getZ()) > VisionConstants.maxZError 
-                    || observation.pose().getX() < 0.0
-                    || observation.pose().getX() > VisionConstants.aprilTagLayout.getFieldLength()
-                    || observation.pose().getY() < 0.0
-                    || observation.pose().getY() > VisionConstants.aprilTagLayout.getFieldWidth();
+                boolean rejectPose = observation.numTags() == 0 || (observation.numTags() == 1 && observation.averageAmbiguity() > VisionConstants.maxAmbiguity) //|| Math.abs(observation.cameraPose().getZ()) > VisionConstants.maxZError 
+                    || observation.cameraPose().getX() < 0.0
+                    || observation.cameraPose().getX() > VisionConstants.aprilTagLayout.getFieldLength()
+                    || observation.cameraPose().getY() < 0.0
+                    || observation.cameraPose().getY() > VisionConstants.aprilTagLayout.getFieldWidth();
 
                 // Add pose to log
-                robotPoses.add(observation.pose());
+                robotPoses.add(observation.cameraPose());
 
                 if (rejectPose) {
-                    robotPosesRejected.add(observation.pose());
+                    robotPosesRejected.add(observation.cameraPose());
                 } else {
-                    robotPosesAccepted.add(observation.pose());
+                    robotPosesAccepted.add(observation.cameraPose());
                 }
 
                 // Skip if rejected
@@ -91,23 +87,18 @@ public class Vision extends SubsystemBase {
                     continue;
                 }
 
-                double stdDevFactor = Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+                double stdDevFactor = Math.pow(observation.averageTagDistance(), 2.0) / observation.numTags();
                 double linearStdDev = VisionConstants.linearStdDevBaseline * stdDevFactor;
                 double angularStdDev = VisionConstants.angularStdDevBaseline * stdDevFactor;
-
-                if (observation.type() == PoseObservationType.MEGATAG_2) {
-                    linearStdDev *= VisionConstants.linearStdDevMegatag2Factor;
-                    angularStdDev *= VisionConstants.angularStdDevMegatag2Factor;
-                }
 
                 if (cameraIndex < VisionConstants.cameraStdDevFactors.length) {
                     linearStdDev *= VisionConstants.cameraStdDevFactors[cameraIndex];
                     angularStdDev *= VisionConstants.cameraStdDevFactors[cameraIndex];
                 }
 
-                // Send vision observation
+                //Send vision observation
                 consumer.accept(
-                    observation.pose().toPose2d(),
+                    observation.cameraPose().toPose2d(),
                     observation.timestamp(),
                     VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
                 );

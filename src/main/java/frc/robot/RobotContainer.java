@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 
@@ -11,8 +14,10 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
 
 import frc.robot.command_factories.DrivetrainFactory;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,6 +41,7 @@ import frc.robot.subsystems.drivetrain.ModuleIOSimulation;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOSimulation;
 
 public class RobotContainer {
   private final Drivetrain drivetrain;
@@ -84,13 +90,17 @@ public class RobotContainer {
       case REAL -> {
         return new Vision(
           drivetrain::addVisionMeasurement, 
-          new VisionIOPhotonVision(VisionConstants.camera0Name, VisionConstants.robotToCamera0), 
-          new VisionIOPhotonVision(VisionConstants.camera1Name, VisionConstants.robotToCamera1)
+          new VisionIOPhotonVision(VisionConstants.camera0Name, VisionConstants.aprilTagLayout, VisionConstants.robotToCamera0) 
+          //new VisionIOPhotonVision(VisionConstants.camera1Name, VisionConstants.aprilTagLayout, VisionConstants.robotToCamera1)
         );
       }
 
       case SIM -> {
-        return new Vision(drivetrain::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        return new Vision(
+          drivetrain::addVisionMeasurement, 
+          new VisionIOSimulation(VisionConstants.camera0Name, VisionConstants.aprilTagLayout, drivetrain::getPose, VisionConstants.robotToCamera0), 
+          new VisionIOSimulation(VisionConstants.camera1Name, VisionConstants.aprilTagLayout, drivetrain::getPose, VisionConstants.robotToCamera1)
+        );
       }
 
       default -> {
@@ -99,7 +109,7 @@ public class RobotContainer {
     }
   }
 
-  public Drivetrain getDrivetrain() {
+  public Drivetrain getDrivetrain() { 
     return drivetrain;
   }
 
